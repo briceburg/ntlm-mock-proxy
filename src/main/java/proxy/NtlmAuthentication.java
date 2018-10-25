@@ -44,8 +44,16 @@ public class NtlmAuthentication {
     if (negotiate == null)
       return null;
 
-    ChallengeMessage challengeMessage = new ChallengeMessage(null, null, 0);
+    ChallengeMessage challengeMessage = new ChallengeMessage(null, null, negotiateCharset(negotiate.flags));
     return "NTLM " + Base64.getEncoder().encodeToString(challengeMessage.toBytes());
+  }
+
+  private int negotiateCharset(int base) {
+    if (NTLMFlags.unicode(base))
+      return NTLMFlags.NTLMSSP_NEGOTIATE_UNICODE;
+    if (NTLMFlags.oem(base))
+      return NTLMFlags.NTLM_NEGOTIATE_OEM;
+    return 0;
   }
 
   private String getNtlmHeader(HttpServletRequest req) {

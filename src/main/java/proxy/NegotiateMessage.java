@@ -46,8 +46,8 @@ public class NegotiateMessage {
       dis.get(version);
     }
 
-    String domainName = domainNameLen > 0 ? new String(message, domainNameBufferOffset, domainNameLen) : null;
-    String workstation = workstationLen > 0 ? new String(message, workstationBufferOffset, workstationLen) : null;
+    String domainName = domainNameLen > 0 ? NTLMFlags.decode(message, domainNameBufferOffset, domainNameLen, negotiateFlags) : null;
+    String workstation = workstationLen > 0 ? NTLMFlags.decode(message, workstationBufferOffset, workstationLen, negotiateFlags) : null;
     return new NegotiateMessage(domainName, workstation, negotiateFlags);
   }
 }

@@ -77,9 +77,9 @@ public class AuthenticateMessage {
 
     byte[] lmChallengeResponse = lmChallengeResponseLen > 0 ? Arrays.copyOfRange(body, lmChallengeResponseBufferOffset, lmChallengeResponseBufferOffset + lmChallengeResponseLen) : null;
     byte[] ntChallengeResponse = ntChallengeResponseLen > 0 ? Arrays.copyOfRange(body, ntChallengeResponseBufferOffset, ntChallengeResponseBufferOffset + ntChallengeResponseLen) : null;
-    String domainName = domainNameLen > 0 ? new String(body, domainNameBufferOffset, domainNameLen) : null;
-    String userName = userNameLen > 0 ? new String(body, userNameBufferOffset, userNameLen) : null;
-    String workstation = workstationLen > 0 ? new String(body, workstationBufferOffset, workstationLen) : null;
+    String domainName = domainNameLen > 0 ? NTLMFlags.decode(body, domainNameBufferOffset, domainNameLen, negotiateFlags) : null;
+    String userName = userNameLen > 0 ? NTLMFlags.decode(body, userNameBufferOffset, userNameLen, negotiateFlags) : null;
+    String workstation = workstationLen > 0 ? NTLMFlags.decode(body, workstationBufferOffset, workstationLen, negotiateFlags) : null;
     byte[] encryptedRandomSessionKey = encryptedRandomSessionKeyLen > 0 ? Arrays.copyOfRange(body, encryptedRandomSessionKeyBufferOffset, encryptedRandomSessionKeyBufferOffset + encryptedRandomSessionKeyLen) : null;
 
     return new AuthenticateMessage(lmChallengeResponse, ntChallengeResponse, domainName, userName, workstation, encryptedRandomSessionKey, negotiateFlags, mic);

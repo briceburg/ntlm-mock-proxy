@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.charset.StandardCharsets;
 import java.util.Random;
 
 public class ChallengeMessage {
@@ -24,8 +23,8 @@ public class ChallengeMessage {
   public byte[] toBytes() throws IOException {
     ByteBuffer dos = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN);
 
-    byte[] targetName = (this.targetName != null ? this.targetName : "").getBytes(StandardCharsets.UTF_8);
-    byte[] targetInfo = (this.targetInfo != null ? this.targetInfo : "").getBytes(StandardCharsets.UTF_8);
+    byte[] targetName = NTLMFlags.encode(this.targetName != null ? this.targetName : "", flags);
+    byte[] targetInfo = NTLMFlags.encode(this.targetInfo != null ? this.targetInfo : "", flags);
 
     ByteArrayOutputStream payload = new ByteArrayOutputStream();
 
