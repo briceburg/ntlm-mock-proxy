@@ -12,9 +12,12 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 
+import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.proxy.ConnectHandler;
 import org.eclipse.jetty.proxy.ProxyServlet;
+import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.servlet.FilterHolder;
@@ -84,6 +87,19 @@ public class NtlmServer {
       catch (IOException e) {
         throw new RuntimeException(e);
       }
+    }
+
+    @Override
+    protected void handleConnect(Request baseRequest, HttpServletRequest request, HttpServletResponse response, String serverAddress) {
+      HttpServletResponseWrapper wrappedResponse = new HttpServletResponseWrapper(response) {
+        @Override
+        public void setHeader(String name, String value) {
+          if (containsHeader(HttpHeader.CONNECTION.asString()))
+            return; // dammit jetty, don't overwrite my headers!
+          super.setHeader(name, value);
+        }
+      };
+      super.handleConnect(baseRequest, request, wrappedResponse, serverAddress);
     }
   }
 
