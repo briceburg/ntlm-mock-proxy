@@ -1,0 +1,9 @@
+package proxy;
+
+public interface NTLMFlags {
+
+  int NTLMSSP_NEGOTIATE_EXTENDED_SESSIONSECURITY = 1 << 19;
+  int NTLMSSP_TARGET_TYPE_SERVER = 1 << 17;
+  int NTLMSSP_TARGET_TYPE_DOMAIN = 1 << 16;
+  int NTLM_NEGOTIATE_OEM = 1 << 1;
+}
