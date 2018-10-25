@@ -31,12 +31,18 @@ public class NtlmAuthentication {
       return false;
 
     String expectedUser = System.getProperty("ntlm.user");
-    boolean userMatch = expectedUser == null || expectedUser.equalsIgnoreCase(authMessage.userName);
+    if (expectedUser != null && !expectedUser.equalsIgnoreCase(authMessage.userName)) {
+      System.out.println("rejected; expected user=" + expectedUser + ", actual=" + authMessage.userName);
+      return false;
+    }
 
     String expectedDomain = System.getProperty("ntlm.domain");
-    boolean domainMatch = expectedDomain == null || expectedDomain.equalsIgnoreCase(authMessage.domainName);
+    if (expectedDomain != null && !expectedDomain.equalsIgnoreCase(authMessage.domainName)) {
+      System.out.println("rejected; expected domain=" + expectedDomain + ", actual=" + authMessage.domainName);
+      return false;
+    }
 
-    return userMatch && domainMatch;
+    return true;
   }
 
   private String generateChallenge(String auth) throws IOException {
