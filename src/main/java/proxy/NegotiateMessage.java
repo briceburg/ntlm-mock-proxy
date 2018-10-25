@@ -40,7 +40,7 @@ public class NegotiateMessage {
     int workstationBufferOffset = dis.getInt();
 
     // Version
-    byte[] version;
+    byte[] version = null;
     if (dis.hasRemaining()) {
       version = new byte[8];
       dis.get(version);

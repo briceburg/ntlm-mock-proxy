@@ -11,10 +11,10 @@ public class ChallengeMessage {
   private static final Random r = new Random();
 
   public final String targetName;
-  public final String targetInfo;
+  public final byte[] targetInfo;
   public final int flags;
 
-  public ChallengeMessage(String targetName, String targetInfo, int flags) {
+  public ChallengeMessage(String targetName, byte[] targetInfo, int flags) {
     this.targetName = targetName;
     this.targetInfo = targetInfo;
     this.flags = flags;
@@ -24,7 +24,7 @@ public class ChallengeMessage {
     ByteBuffer dos = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN);
 
     byte[] targetName = NTLMFlags.encode(this.targetName != null ? this.targetName : "", flags);
-    byte[] targetInfo = NTLMFlags.encode(this.targetInfo != null ? this.targetInfo : "", flags);
+    byte[] targetInfo = this.targetInfo != null ? this.targetInfo : new byte[0];
 
     ByteArrayOutputStream payload = new ByteArrayOutputStream();
 

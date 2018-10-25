@@ -69,11 +69,17 @@ public class AuthenticateMessage {
 
     int negotiateFlags = dis.getInt();
 
-    byte[] version = new byte[8];
-    dis.get(version);
+    byte[] version = null;
+    if (dis.hasRemaining()) {
+      version = new byte[8];
+      dis.get(version);
+    }
 
-    byte[] mic = new byte[16]; // message integrity
-    dis.get(mic);
+    byte[] mic = null; // message integrity
+    if (dis.hasRemaining()) {
+      mic = new byte[16];
+      dis.get(mic);
+    }
 
     byte[] lmChallengeResponse = lmChallengeResponseLen > 0 ? Arrays.copyOfRange(body, lmChallengeResponseBufferOffset, lmChallengeResponseBufferOffset + lmChallengeResponseLen) : null;
     byte[] ntChallengeResponse = ntChallengeResponseLen > 0 ? Arrays.copyOfRange(body, ntChallengeResponseBufferOffset, ntChallengeResponseBufferOffset + ntChallengeResponseLen) : null;
