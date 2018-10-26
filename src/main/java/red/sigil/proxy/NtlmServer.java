@@ -1,4 +1,4 @@
-package proxy;
+package red.sigil.proxy;
 
 import java.io.IOException;
 import java.util.EnumSet;

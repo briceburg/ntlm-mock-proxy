@@ -1,4 +1,4 @@
-package proxy;
+package red.sigil.proxy;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

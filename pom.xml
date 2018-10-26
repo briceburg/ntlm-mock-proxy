@@ -7,6 +7,7 @@
   <groupId>red.sigil</groupId>
   <artifactId>ntlm-mock-proxy</artifactId>
   <version>1.0-SNAPSHOT</version>
+  <url>https://github.com/mbakhoff/ntlm-mock-proxy</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -54,7 +55,7 @@
             <configuration>
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>proxy.NtlmServer</mainClass>
+                  <mainClass>red.sigil.proxy.NtlmServer</mainClass>
                 </transformer>
               </transformers>
             </configuration>
