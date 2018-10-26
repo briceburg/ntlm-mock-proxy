@@ -23,13 +23,13 @@ public class ChallengeMessage {
   public byte[] toBytes() throws IOException {
     ByteBuffer dos = ByteBuffer.allocate(2048).order(ByteOrder.LITTLE_ENDIAN);
 
-    byte[] targetName = NTLMFlags.encode(this.targetName != null ? this.targetName : "", flags);
+    byte[] targetName = (this.targetName != null ? this.targetName : "").getBytes(NTLMFlags.encoding(flags));
     byte[] targetInfo = this.targetInfo != null ? this.targetInfo : new byte[0];
 
     ByteArrayOutputStream payload = new ByteArrayOutputStream();
 
     // signature
-    dos.put(new byte[]{'N', 'T', 'L', 'M', 'S', 'S', 'P', 0});
+    dos.put(NTLMFlags.SIGNATURE);
     // MessageType
     dos.putInt(2);
 

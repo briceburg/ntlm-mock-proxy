@@ -2,17 +2,21 @@ package proxy;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.Charset;
+import java.util.Arrays;
 
 public class NegotiateMessage {
 
   public final String domainName;
   public final String workstation;
   public final int flags;
+  public final byte[] version;
 
-  public NegotiateMessage(String domainName, String workstation, int flags) {
+  public NegotiateMessage(String domainName, String workstation, int flags, byte[] version) {
     this.domainName = domainName;
     this.workstation = workstation;
     this.flags = flags;
+    this.version = version;
   }
 
   public static NegotiateMessage fromBytes(byte[] message) {
@@ -20,6 +24,8 @@ public class NegotiateMessage {
 
     byte[] signature = new byte[8];
     dis.get(signature);
+    if (!Arrays.equals(signature, NTLMFlags.SIGNATURE))
+      throw new IllegalArgumentException("bad signature");
 
     int messageType = dis.getInt();
     if (messageType != 1) {
@@ -46,8 +52,9 @@ public class NegotiateMessage {
       dis.get(version);
     }
 
-    String domainName = domainNameLen > 0 ? NTLMFlags.decode(message, domainNameBufferOffset, domainNameLen, negotiateFlags) : null;
-    String workstation = workstationLen > 0 ? NTLMFlags.decode(message, workstationBufferOffset, workstationLen, negotiateFlags) : null;
-    return new NegotiateMessage(domainName, workstation, negotiateFlags);
+    Charset encoding = NTLMFlags.encoding(negotiateFlags);
+    String domainName = domainNameLen > 0 ? new String(message, domainNameBufferOffset, domainNameLen, encoding) : null;
+    String workstation = workstationLen > 0 ? new String(message, workstationBufferOffset, workstationLen, encoding) : null;
+    return new NegotiateMessage(domainName, workstation, negotiateFlags, version);
   }
 }

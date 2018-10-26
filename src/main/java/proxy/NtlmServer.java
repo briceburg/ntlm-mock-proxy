@@ -26,6 +26,8 @@ import org.eclipse.jetty.servlet.ServletHolder;
 
 public class NtlmServer {
 
+  private static final String CONNECT_HEADER = HttpHeader.CONNECTION.asString();
+
   public static void main(String[] args) throws Exception {
     int port = Integer.parseInt(System.getProperty("http.port", "8080"));
 
@@ -94,7 +96,7 @@ public class NtlmServer {
       HttpServletResponseWrapper wrappedResponse = new HttpServletResponseWrapper(response) {
         @Override
         public void setHeader(String name, String value) {
-          if (containsHeader(HttpHeader.CONNECTION.asString()))
+          if (name.equalsIgnoreCase(CONNECT_HEADER) && containsHeader(CONNECT_HEADER))
             return; // dammit jetty, don't overwrite my headers!
           super.setHeader(name, value);
         }

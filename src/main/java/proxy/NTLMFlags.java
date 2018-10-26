@@ -5,6 +5,8 @@ import java.nio.charset.StandardCharsets;
 
 public interface NTLMFlags {
 
+  byte[] SIGNATURE = {'N', 'T', 'L', 'M', 'S', 'S', 'P', 0};
+
   int NTLMSSP_NEGOTIATE_EXTENDED_SESSIONSECURITY = 1 << 19;
   int NTLMSSP_TARGET_TYPE_SERVER = 1 << 17;
   int NTLMSSP_TARGET_TYPE_DOMAIN = 1 << 16;
@@ -19,13 +21,8 @@ public interface NTLMFlags {
     return (flags & NTLMSSP_NEGOTIATE_UNICODE) != 0;
   }
 
-  static byte[] encode(String s, int flags) {
-    Charset charset = unicode(flags) ? StandardCharsets.UTF_16LE : StandardCharsets.UTF_8;
-    return s.getBytes(charset);
+  static Charset encoding(int flags) {
+    return unicode(flags) ? StandardCharsets.UTF_16LE : StandardCharsets.UTF_8;
   }
 
-  static String decode(byte[] data, int off, int len, int flags) {
-    Charset charset = unicode(flags) ? StandardCharsets.UTF_16LE : StandardCharsets.UTF_8;
-    return new String(data, off, len, charset);
-  }
 }

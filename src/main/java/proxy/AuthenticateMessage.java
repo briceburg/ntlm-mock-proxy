@@ -2,6 +2,7 @@ package proxy;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 
 public class AuthenticateMessage {
@@ -13,9 +14,10 @@ public class AuthenticateMessage {
   public final String workstation;
   public final byte[] sessionKey;
   public final int flags;
+  public final byte[] version;
   public final byte[] mic;
 
-  public AuthenticateMessage(byte[] lmChallengeResponse, byte[] ntChallengeResponse, String domainName, String userName, String workstation, byte[] sessionKey, int flags, byte[] mic) {
+  public AuthenticateMessage(byte[] lmChallengeResponse, byte[] ntChallengeResponse, String domainName, String userName, String workstation, byte[] sessionKey, int flags, byte[] version, byte[] mic) {
     this.lmChallengeResponse = lmChallengeResponse;
     this.ntChallengeResponse = ntChallengeResponse;
     this.domainName = domainName;
@@ -23,6 +25,7 @@ public class AuthenticateMessage {
     this.workstation = workstation;
     this.sessionKey = sessionKey;
     this.flags = flags;
+    this.version = version;
     this.mic = mic;
   }
 
@@ -31,6 +34,8 @@ public class AuthenticateMessage {
 
     byte[] signature = new byte[8];
     dis.get(signature);
+    if (!Arrays.equals(signature, NTLMFlags.SIGNATURE))
+      throw new IllegalArgumentException("bad signature");
 
     int messageType = dis.getInt();
     if (messageType != 3) {
@@ -38,33 +43,33 @@ public class AuthenticateMessage {
     }
 
     // LmChallengeResponseFields
-    short lmChallengeResponseLen = dis.getShort();
-    short lmChallengeResponseMaxLen = dis.getShort();
+    int lmChallengeResponseLen = dis.getShort();
+    int lmChallengeResponseMaxLen = dis.getShort();
     int lmChallengeResponseBufferOffset = dis.getInt();
 
     // NtChallengeResponseFields
-    short ntChallengeResponseLen = dis.getShort();
-    short ntChallengeResponseMaxLen = dis.getShort();
+    int ntChallengeResponseLen = dis.getShort();
+    int ntChallengeResponseMaxLen = dis.getShort();
     int ntChallengeResponseBufferOffset = dis.getInt();
 
     // DomainNameFields
-    short domainNameLen = dis.getShort();
-    short domainNameMaxLen = dis.getShort();
+    int domainNameLen = dis.getShort();
+    int domainNameMaxLen = dis.getShort();
     int domainNameBufferOffset = dis.getInt();
 
     // UserNameFields
-    short userNameLen = dis.getShort();
-    short userNameMaxLen = dis.getShort();
+    int userNameLen = dis.getShort();
+    int userNameMaxLen = dis.getShort();
     int userNameBufferOffset = dis.getInt();
 
     // WorkstationFields
-    short workstationLen = dis.getShort();
-    short workstationMaxLen = dis.getShort();
+    int workstationLen = dis.getShort();
+    int workstationMaxLen = dis.getShort();
     int workstationBufferOffset = dis.getInt();
 
     // EncryptedRandomSessionKeyFields
-    short encryptedRandomSessionKeyLen = dis.getShort();
-    short encryptedRandomSessionKeyMaxLen = dis.getShort();
+    int encryptedRandomSessionKeyLen = dis.getShort();
+    int encryptedRandomSessionKeyMaxLen = dis.getShort();
     int encryptedRandomSessionKeyBufferOffset = dis.getInt();
 
     int negotiateFlags = dis.getInt();
@@ -81,13 +86,14 @@ public class AuthenticateMessage {
       dis.get(mic);
     }
 
+    Charset encoding = NTLMFlags.encoding(negotiateFlags);
     byte[] lmChallengeResponse = lmChallengeResponseLen > 0 ? Arrays.copyOfRange(body, lmChallengeResponseBufferOffset, lmChallengeResponseBufferOffset + lmChallengeResponseLen) : null;
     byte[] ntChallengeResponse = ntChallengeResponseLen > 0 ? Arrays.copyOfRange(body, ntChallengeResponseBufferOffset, ntChallengeResponseBufferOffset + ntChallengeResponseLen) : null;
-    String domainName = domainNameLen > 0 ? NTLMFlags.decode(body, domainNameBufferOffset, domainNameLen, negotiateFlags) : null;
-    String userName = userNameLen > 0 ? NTLMFlags.decode(body, userNameBufferOffset, userNameLen, negotiateFlags) : null;
-    String workstation = workstationLen > 0 ? NTLMFlags.decode(body, workstationBufferOffset, workstationLen, negotiateFlags) : null;
+    String domainName = domainNameLen > 0 ? new String(body, domainNameBufferOffset, domainNameLen, encoding) : null;
+    String userName = userNameLen > 0 ? new String(body, userNameBufferOffset, userNameLen, encoding) : null;
+    String workstation = workstationLen > 0 ? new String(body, workstationBufferOffset, workstationLen, encoding) : null;
     byte[] encryptedRandomSessionKey = encryptedRandomSessionKeyLen > 0 ? Arrays.copyOfRange(body, encryptedRandomSessionKeyBufferOffset, encryptedRandomSessionKeyBufferOffset + encryptedRandomSessionKeyLen) : null;
 
-    return new AuthenticateMessage(lmChallengeResponse, ntChallengeResponse, domainName, userName, workstation, encryptedRandomSessionKey, negotiateFlags, mic);
+    return new AuthenticateMessage(lmChallengeResponse, ntChallengeResponse, domainName, userName, workstation, encryptedRandomSessionKey, negotiateFlags, version, mic);
   }
 }
